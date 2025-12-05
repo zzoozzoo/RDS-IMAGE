@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ParentSection, ImageAsset } from '../types';
 import svgPaths from "../imports/svg-eui8r3w2mf";
-import { translateText } from '../utils/googleTranslate';
 
 interface SaveAssetModalProps {
   isOpen: boolean;
@@ -27,8 +26,6 @@ export function SaveAssetModal({
   const [imageUrl, setImageUrl] = useState(initialImageUrl);
   const [isDragging, setIsDragging] = useState(false);
 
-  const [isTranslating, setIsTranslating] = useState(false);
-
   useEffect(() => {
     setImageUrl(initialImageUrl);
   }, [initialImageUrl]);
@@ -47,32 +44,7 @@ export function SaveAssetModal({
     }
   }, [existingAsset, parentSections]);
 
-  // Auto-generate tags when image name changes
-  useEffect(() => {
-    if (imageName && !existingAsset) {
-      const generateTags = async () => {
-        setIsTranslating(true);
-        try {
-          const [zhTag, thTag] = await Promise.all([
-            translateText(imageName, 'zh-TW'),
-            translateText(imageName, 'th')
-          ]);
-
-          setTags({
-            zh_TW: [zhTag],
-            th: [thTag]
-          });
-        } catch (error) {
-          console.error('Error generating tags:', error);
-        } finally {
-          setIsTranslating(false);
-        }
-      };
-
-      const timer = setTimeout(generateTags, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [imageName, existingAsset]);
+  // Note: tags are now user-supplied only; auto-translation removed.
 
   const handleSave = () => {
     if (!selectedCategory || !imageName || !imageUrl) return;
@@ -292,7 +264,7 @@ export function SaveAssetModal({
                         type="text"
                         value={tags.zh_TW.join(', ')}
                         onChange={(e) => setTags(prev => ({ ...prev, zh_TW: e.target.value.split(',').map(t => t.trim()) }))}
-                        placeholder={isTranslating ? "Generating..." : "ex. 電子票券, 現金禮券"}
+                        placeholder="ex. 電子票券, 現金禮券"
                         className="basis-0 font-['SF_Pro:Regular','Noto_Sans_JP:Regular',sans-serif] font-normal grow leading-[24px] min-h-px min-w-px relative shrink-0 text-[#fcfcfc] placeholder:text-[#555555] text-[18px] bg-transparent border-none outline-none w-full"
                         style={{ fontVariationSettings: "'wdth' 100" }}
                       />
@@ -314,7 +286,7 @@ export function SaveAssetModal({
                         type="text"
                         value={tags.th.join(', ')}
                         onChange={(e) => setTags(prev => ({ ...prev, th: e.target.value.split(',').map(t => t.trim()) }))}
-                        placeholder={isTranslating ? "Generating..." : "ex. บัตรกำนัล, คูปอง"}
+                        placeholder="ex. บัตรกำนัล, คูปอง"
                         className="basis-0 font-['SF_Pro:Regular','Noto_Sans_JP:Regular',sans-serif] font-normal grow leading-[24px] min-h-px min-w-px relative shrink-0 text-[#fcfcfc] placeholder:text-[#555555] text-[18px] bg-transparent border-none outline-none w-full"
                         style={{ fontVariationSettings: "'wdth' 100" }}
                       />
